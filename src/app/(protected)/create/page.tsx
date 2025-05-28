@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
-import Image from "next/image";
+import { Loader2 } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -20,7 +20,6 @@ const CreateProjectPage = () => {
     const createProject = api.project.createProject.useMutation();
 
     const onSubmit = (data: FormInput) => {
-        window.alert(JSON.stringify(data));
         createProject.mutate(
             {
                 githubUrl: data.repoUrl,
@@ -29,7 +28,7 @@ const CreateProjectPage = () => {
             },
             {
                 onSuccess: () => {
-                    toast.success("Project created successfully!", {
+                    toast.success("Project created successfully", {
                         description:
                             "Your project has been linked with Dimpel.",
                     });
@@ -42,7 +41,6 @@ const CreateProjectPage = () => {
                 },
             }
         );
-
         return true;
     };
 
@@ -82,7 +80,20 @@ const CreateProjectPage = () => {
                             placeholder="Enter your Github token (optional)"
                             className="mb-4"
                         />
-                        <Button type="submit">Create Project</Button>
+                        <Button
+                            disabled={createProject.isPending}
+                            type="submit"
+                            className="cursor-pointer"
+                        >
+                            {createProject.isPending ? (
+                                <>
+                                    <Loader2 className="animate-[spin_1s_linear_infinite]" />
+                                    <span>Creating...</span>
+                                </>
+                            ) : (
+                                "Create Project"
+                            )}
+                        </Button>
                     </form>
                 </div>
             </div>

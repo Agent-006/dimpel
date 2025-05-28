@@ -8,6 +8,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { ThemeProvider } from "../components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Dimpel",
@@ -29,6 +30,7 @@ export default function RootLayout({
         >
           <ClerkProvider appearance={{ baseTheme: dark }}>
             <TRPCReactProvider>{children}</TRPCReactProvider>
+            <Toaster />
           </ClerkProvider>
         </ThemeProvider>
       </body>
