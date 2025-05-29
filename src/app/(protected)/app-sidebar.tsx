@@ -13,17 +13,19 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
+import useProject from "@/hooks/use-project";
 import { cn } from "@/lib/utils";
 import {
     Bot,
     CreditCard,
     LayoutDashboard,
+    Loader2,
     Plus,
     Presentation,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { JSX, ReactNode } from "react";
+import { useState } from "react";
 
 const items = [
     {
@@ -48,22 +50,13 @@ const items = [
     },
 ];
 
-const projects = [
-    {
-        name: "Project A",
-    },
-    {
-        name: "Project B",
-    },
-    {
-        name: "Project C",
-    },
-];
-
 export function AppSidebar() {
     const pathname = usePathname();
 
     const { open } = useSidebar();
+
+    const { projects, projectId, setProjectId, isLoading } = useProject();
+    console.log(projects, isLoading, projectId);
 
     return (
         <Sidebar collapsible="icon" variant="floating" className="mb-6">
@@ -117,49 +110,59 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupLabel>Your Projects</SidebarGroupLabel>
                     <SidebarGroupContent>
-                        <SidebarMenu>
-                            {projects.map((project) => (
-                                <SidebarMenuItem key={project.name}>
-                                    <SidebarMenuButton asChild>
-                                        <div>
+                        {isLoading ? (
+                            <div className="flex items-center justify-center p-4">
+                                <Loader2 className="text-primary/80 h-6 w-6 animate-spin" />
+                            </div>
+                        ) : (
+                            <SidebarMenu>
+                                {projects?.map((project) => (
+                                    <SidebarMenuItem key={project.name}>
+                                        <SidebarMenuButton asChild>
                                             <div
-                                                className={cn(
-                                                    "bg-primary flex size-6 items-center justify-center rounded-sm border text-sm text-white",
-                                                    {
-                                                        "bg-primary text-white":
-                                                            true,
-                                                        // 'bg-primary text-foreground' : project.id === project.id,
-                                                    }
-                                                )}
+                                                onClick={() => {
+                                                    setProjectId(project.id);
+                                                }}
                                             >
-                                                {project.name[0]}
+                                                <div
+                                                    className={cn(
+                                                        "bg-foreground text-primary flex size-6 items-center justify-center rounded-sm border text-sm font-semibold",
+                                                        {
+                                                            "bg-primary text-foreground":
+                                                                project.id ===
+                                                                projectId,
+                                                        }
+                                                    )}
+                                                >
+                                                    {project.name[0]?.toUpperCase()}
+                                                </div>
+                                                {open && (
+                                                    <span>{project.name}</span>
+                                                )}
                                             </div>
-                                            {open && (
-                                                <span>{project.name}</span>
-                                            )}
-                                        </div>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                            <div className="h-2"></div>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                                <div className="h-2"></div>
 
-                            <SidebarMenuItem
-                                className={cn("", {
-                                    "flex justify-center": !open,
-                                })}
-                            >
-                                <Link href="/create">
-                                    <Button
-                                        size="sm"
-                                        variant={"outline"}
-                                        className="w-fit"
-                                    >
-                                        <Plus />
-                                        {open && "Create Project"}
-                                    </Button>
-                                </Link>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
+                                <SidebarMenuItem
+                                    className={cn("", {
+                                        "flex justify-center": !open,
+                                    })}
+                                >
+                                    <Link href="/create">
+                                        <Button
+                                            size="sm"
+                                            variant={"outline"}
+                                            className="w-fit"
+                                        >
+                                            <Plus />
+                                            {open && "Create Project"}
+                                        </Button>
+                                    </Link>
+                                </SidebarMenuItem>
+                            </SidebarMenu>
+                        )}
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>

@@ -1,12 +1,13 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { Loader2 } from "lucide-react";
-import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import useRefetch from "@/hooks/use-refetch";
 
 type FormInput = {
     repoUrl: string;
@@ -18,6 +19,8 @@ const CreateProjectPage = () => {
     const { register, handleSubmit, reset } = useForm<FormInput>();
 
     const createProject = api.project.createProject.useMutation();
+
+    const refetch = useRefetch();
 
     const onSubmit = (data: FormInput) => {
         createProject.mutate(
@@ -32,6 +35,7 @@ const CreateProjectPage = () => {
                         description:
                             "Your project has been linked with Dimpel.",
                     });
+                    refetch(); // Refetch projects to update the list
                     reset(); // Reset the form after successful submission
                 },
                 onError: (error) => {

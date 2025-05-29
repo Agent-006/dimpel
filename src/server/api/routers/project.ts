@@ -3,6 +3,8 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const projectRouter = createTRPCRouter({
+
+    // This procedure creates a new project in the database.
     createProject: protectedProcedure
     .input(
         z.object({
@@ -59,4 +61,46 @@ export const projectRouter = createTRPCRouter({
             });
         }
     }),
+
+    // This procedure retrieves all projects for the authenticated user.
+    getProjects: protectedProcedure
+    .query(async ({ ctx }) => {
+
+        const user = await ctx.db.user.findUnique({
+            where: {
+                id: ctx.user.userId!,
+            },
+        });
+
+        if(!user) {{
+            throw new TRPCError({
+                code: 'UNAUTHORIZED',
+                message: 'User not found or not authorized to access projects. Please log in again.',
+                cause: new Error('User not found or not authorized'),
+            });
+        }}
+
+        
+        try {
+            const projects = await ctx.db.project.findMany({
+                where: {
+                    userToProjects: {
+                        some: {
+                            userId: ctx.user.userId!,
+                        },
+                    },
+                    deletedAt: null, // Ensure we only get non-deleted projects
+                },
+            });
+
+            return projects;
+        } catch (error) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to retrieve projects",
+                cause: error,
+            });
+        }
+    }),
+
 });
