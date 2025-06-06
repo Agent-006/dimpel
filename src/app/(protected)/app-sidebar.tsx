@@ -117,7 +117,10 @@ export function AppSidebar() {
                         ) : (
                             <SidebarMenu>
                                 {projects?.map((project) => (
-                                    <SidebarMenuItem key={project.name}>
+                                    <SidebarMenuItem
+                                        className="cursor-pointer"
+                                        key={project.name}
+                                    >
                                         <SidebarMenuButton asChild>
                                             <div
                                                 onClick={() => {
@@ -126,7 +129,7 @@ export function AppSidebar() {
                                             >
                                                 <div
                                                     className={cn(
-                                                        "bg-foreground text-primary flex size-6 items-center justify-center rounded-sm border text-sm font-semibold",
+                                                        "text-primary flex size-6 items-center justify-center rounded-sm border text-sm font-semibold",
                                                         {
                                                             "bg-primary text-foreground":
                                                                 project.id ===

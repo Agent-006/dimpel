@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { pollCommits } from "@/lib/github";
 
 export const projectRouter = createTRPCRouter({
 
@@ -40,11 +41,14 @@ export const projectRouter = createTRPCRouter({
                         },
                     },
                 },
-                include: {
-                    userToProjects: true, // Return the relation if needed
-                },
+                // include: {
+                //     userToProjects: true, // Return the relation if needed
+                // },
             });
 
+            const response = await pollCommits(project.id);
+            console.log("from prject:", response);
+            
             return project;
         } catch (error) {
             if (error instanceof Error && error.message.includes("Unique constraint")) {
@@ -103,4 +107,34 @@ export const projectRouter = createTRPCRouter({
         }
     }),
 
+    // This procedure retrieves all commits for a project.
+    getCommits: protectedProcedure
+    .input(z.object({
+        projectId: z.string(),
+    }))
+    .query(async ({ctx, input})=>{
+
+        //FIXME: Might not work 
+        pollCommits(input.projectId).then().catch((error) => {
+            console.error("Error polling commits:", error); 
+        });
+        
+        const commits = await ctx.db.commit.findMany({
+            where: {
+                projectId: input.projectId,
+            },
+            orderBy: {
+                commitDate: 'desc',
+            },
+        });
+
+        if (!commits) {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "No commits found for this project",
+            });
+        }
+
+        return commits || [];
+    }),
 });
